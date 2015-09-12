@@ -37,7 +37,7 @@ for i=1:length(subject_id)
     
     %% BEGIN LOOP. EACH CYCLE REPRESENTS A TEST_ID
     for j=1:length(test_id)
-     test=test_id(j)
+        test=test_id(j)
         switch test
             case 'HINT'
             %% IDENTIFY TEST RESULT FILENAME
