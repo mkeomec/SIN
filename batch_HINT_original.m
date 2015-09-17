@@ -63,17 +63,30 @@ end
 %% 
 
 % %% CREATE CVS FILE
+outputdata
+size_outputdata=size(outputdata)
+outid=fopen('batch_HINT.csv','w+')
+header='Subject_ID, HINT_(SNR-50_ISTS), HINT_(SNR-50_SPSHN), HINT_(SNR-80_ISTS), HINT_(SNR-80_SPSHN)'
+fprintf(outid, '%s\n', header);
+for i = 1:size_outputdata(1)
+outLine = regexprep(num2str(outputdata(i,1:5)), '  *', ',');
+fprintf(outid, '%s\n', outLine);
+end
+fclose(outid)
+
+
+
 % headers={'Subject_ID RTS' char(test_id_header(1)) char(test_id_header(2)) char(test_id_header(3)) char(test_id_header(4))}
 % csvwrite(strcat('batch',test_id,'.csv'),headers)
 
 % headers={
-filename = 'batch_HINT.csv';
-header={'Subject_ID' 'HINT_(SNR-50,ISTS)' 'HINT_(SNR-50,SPSHN)' 'HINT_(SNR-80,ISTS)' 'HINT_(SNR-80,SPSHN)'}
-fid = fopen(filename, 'w');
-% fprintf('%s %s %s %s\n', 'col1', 'col2', 'col3', 'col4');
-% fprintf(fid, '%s %s %s %s %s\n','Subject_ID', 'HINT_(SNR-50,ISTS)','HINT_(SNR-50,SPSHN)', 'HINT_(SNR-80,ISTS)','HINT_(SNR-80,SPSHN)' );
-fpintf(fid, '%s,', header{1,end});
-fclose(fid)
+% filename = 'batch_HINT.csv';
+% header={'Subject_ID' 'HINT_(SNR-50,ISTS)' 'HINT_(SNR-50,SPSHN)' 'HINT_(SNR-80,ISTS)' 'HINT_(SNR-80,SPSHN)'}
+% fid = fopen(filename, 'w');
+% % fprintf('%s %s %s %s\n', 'col1', 'col2', 'col3', 'col4');
+% % fprintf(fid, '%s %s %s %s %s\n','Subject_ID', 'HINT_(SNR-50,ISTS)','HINT_(SNR-50,SPSHN)', 'HINT_(SNR-80,ISTS)','HINT_(SNR-80,SPSHN)' );
+% fpintf(fid, '%s,', header{1,end});
+% fclose(fid)
 
 % dlmwrite(filename, outputdata, '-append', 'precision', '%.6f', 'delimiter', '\t');
 
