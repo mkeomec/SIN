@@ -1,20 +1,8 @@
-function output = batch_HINT(subject_id, test_id)
+function output = batch_HINT(subject_id, test_id,plot)
 
 % % DESCRIPTION:
 %
 %   Group Analysis script for HINT
-% NOTES:
-% %% MULTI-STAGE TEST
-% %   Most implementations of HINT are seen as two-stage tests. We want the
-% %   scoring to be based of the last segment (typically)
-% runtime = results(end).RunTime;
-
-%% INPUT PARAMETERS
-
-% subject_id : four digit subject id number. ID numbers starting with 1 are
-% from UW site. ID numbers starting with 2 are from Iowa site
-
-% test_id : Enter, as specific as possible, test_id for group analysis
 
 %% GET INPUT PARAMETERS
 
@@ -31,97 +19,89 @@ function output = batch_HINT(subject_id, test_id)
 % 
 % %% GET TEST INFORMATION
 % all_tests = regexpdir(d.subject.subjectDir, d.regexp, false);
-
 %% BEGIN LOOP. EACH CYCLE REPRESENTS A SUBJECT
 for i=1:length(subject_id)
     
     %% BEGIN LOOP. EACH CYCLE REPRESENTS A TEST_ID
     for j=1:length(test_id)
-     test=test_id(j)
-        switch test
-            case 'HINT'
-            %% IDENTIFY TEST RESULT FILENAME
-            test=test_id(j)
-            ftest_id= strcat('*',test,'*')
-            fullfile(num2str(subject_id(i)),char(ftest_id))
-            filename=dir(fullfile(num2str(subject_id(i)),char(ftest_id)))
-
-            %% LOAD DATA
-            TestResults=load(filename.name);
-
-            %% Turn off plotting to reduce computation time
-            TestResults.results(1).RunTime.analysis.params.plot=0
-            
-            %% RUN ANALYSIS 
-            ResultsOutput=analysis_HINT_test(TestResults,TestResults.results(1).RunTime.analysis.params);
-            
-            %% EXTRACT RTS
-            rtsdata=[subject_id(i) ResultsOutput.analysis.results.rts]
-            Subj_RTSdata(i,1)=rtsdata(1)
-            Subj_RTSdata(i,j+1)=rtsdata(2)
-            RTS_id_header(:,j)=test_id(j)
-    
-            case 'ANL'
-            %% IDENTIFY TEST RESULT FILENAME
-            test=test_id(j)
-
-            ftest_id= strcat('*',test,'*')
-            fullfile(num2str(subject_id(i)),char(ftest_id))
-            filename=dir(fullfile(num2str(subject_id(i)),char(ftest_id)))
+        %% IDENTIFY TEST RESULT FILENAME
+        test=test_id(j);
+        
+        ftest_id= strcat('*',test,'*')
+        num2str(subject_id(i)),char(ftest_id)
+       fullfile(num2str(subject_id(i)),char(ftest_id))
+        filename=dir(fullfile(num2str(subject_id(i)),char(ftest_id)))
 
 
-            % %% CREATE FILENAMES BASED ON subject_id AND test_id
-            % 
-            % sub_id=num2str(subject_id(i))
-            % prefilename= strcat(sub_id,'-',test_id,'*')
-            % prefilename=dir(prefilename)
-            % filename=prefilename.name
+        % %% CREATE FILENAMES BASED ON subject_id AND test_id
+        % 
+        % sub_id=num2str(subject_id(i))
+        % prefilename= strcat(sub_id,'-',test_id,'*')
+        % prefilename=dir(prefilename)
+        % filename=prefilename.name
 
-            %% LOAD DATA
-            TestResults=load(filename.name);
+        %% LOAD DATA
+        TestResults=load(filename.name);
 
-            %% Turn off plotting to reduce computation time
-            TestResults.results(1).RunTime.analysis.params.plot=0
-            %% RUN ANALYSIS 
+        %% Turn off plotting to reduce computation time
+        TestResults.results(1).RunTime.analysis.params.plot=plot;
+        
+        %% RUN ANALYSIS 
 
-            ResultsOutput=analysis_ANL(TestResults,TestResults.results(1).RunTime.analysis.params);
+        [rts rts_std]=analysis_HINT_test(TestResults,TestResults.results(1).RunTime.analysis.params)
+        rts
+        rts_std
 
-            %% EXTRACT ANL
-            ANLdata=[subject_id(i) ResultsOutput(1).RunTime.analysis.results.anl]
-            Subj_ANLdata(i,1)=ANLdata(1)
-            Subj_ANLdata(i,j+1)=ANLdata(2)
-            ANL_id_header(:,j)=test_id(j)
-        end
-
+        %% EXTRACT RTS
+        
+        rtsdata=[subject_id(i) rts rts_std]
+%         Outputdata(2i-1:2i,1)=subject_id(i)
+%         Outputdata(j) =
+        Subj_outputdata(1,1)=rtsdata(1);
+        Subj_outputdata(1,2*j)=rtsdata(2);
+        Subj_outputdata(1,(2*j)+1)=rtsdata(3);
+        test_id_header(:,j)=test_id(j);
+        
     end
-    RTS_outputdata(i,:)=Subj_RTSdata
-    ANL_outputdata(i,:)=Subj_ANLdata
+    outputdata(i,:)=Subj_outputdata
     
 end
         
- 
+%% 
 
-%% CREATE CVS OUTPUT FILES
+% %% CREATE CVS FILE
+% subjectID  noise_type  mean_SNR50   sd_SNR50  mean_SNR80  sd_SNR80  slope  slope/dB
 
-%% Output file for RTS data
+
+outputdata
+size_outputdata=size(outputdata)
+outid=fopen('batch_HINT.csv','w+')
+header='Subject_ID, HINT_(SNR-50_ISTS), HINT_(SNR-50_SPSHN), HINT_(SNR-80_ISTS), HINT_(SNR-80_SPSHN)'
+fprintf(outid, '%s\n', header);
+for i = 1:size_outputdata(1)
+outLine = regexprep(num2str(outputdata(i,1:5)), '  *', ',');
+fprintf(outid, '%s\n', outLine);
+end
+fclose(outid)
+
+
 
 % headers={'Subject_ID RTS' char(test_id_header(1)) char(test_id_header(2)) char(test_id_header(3)) char(test_id_header(4))}
 % csvwrite(strcat('batch',test_id,'.csv'),headers)
 
-headers={'Subject_ID RTS' char(test_id_header(1)) char(test_id_header(2)) char(test_id_header(3)) char(test_id_header(4))}
-filename = strcat('batch_HINT.csv');
+% headers={
+% filename = 'batch_HINT.csv';
+% header={'Subject_ID' 'HINT_(SNR-50,ISTS)' 'HINT_(SNR-50,SPSHN)' 'HINT_(SNR-80,ISTS)' 'HINT_(SNR-80,SPSHN)'}
+% fid = fopen(filename, 'w');
+% % fprintf('%s %s %s %s\n', 'col1', 'col2', 'col3', 'col4');
+% % fprintf(fid, '%s %s %s %s %s\n','Subject_ID', 'HINT_(SNR-50,ISTS)','HINT_(SNR-50,SPSHN)', 'HINT_(SNR-80,ISTS)','HINT_(SNR-80,SPSHN)' );
+% fpintf(fid, '%s,', header{1,end});
+% fclose(fid)
 
-fid = fopen(filename, 'w');
-fprintf(fid, 'Subject_ID HINT_(SNR-50,ISTS) HINT_(SNR-50,SPSHN) HINT_(SNR-80,ISTS) HINT_(SNR-80,SPSHN)\n' );
-fclose(fid)
+% dlmwrite(filename, outputdata, '-append', 'precision', '%.6f', 'delimiter', '\t');
 
-dlmwrite(filename,  RTS_outputdata, '-append', 'precision', '%.6f', 'delimiter', '\t');
+% %% MULTI-STAGE TEST
+% %   Most implementations of HINT are seen as two-stage tests. We want the
+% %   scoring to be based of the last segment (typically)
+% runtime = results(end).RunTime;
 
-%% Output file for ANL data
-
-headers={'Subject_ID' char(test_id_header(1)) char(test_id_header(2))}
-filename = strcat('batch_ANL.csv');
-fid = fopen(filename, 'w');
-fprintf(fid, 'Subject_ID ANL_outputdata(SessionOne) ANL(SessionTwo)\n' );
-fclose(fid)
-dlmwrite(filename, outputdata, '-append', 'precision', '%.6f', 'delimiter', '\t');

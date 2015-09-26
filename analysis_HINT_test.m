@@ -1,4 +1,4 @@
-function results = analysis_HINT_test(results, varargin)
+function [rts, rts_st_dev] = analysis_HINT_test(results, varargin)
 %% DESCRIPTION:
 %
 %   Analysis script for HINT administered under various circumstances
@@ -221,7 +221,8 @@ end % switch d.RTSest
 
 %% APPEND DATA TO ANALYSIS
 %   RTS:
-rts = mean(time_series_trim(rts_mask));
+rts = mean(time_series_trim(rts_mask))
+rts_st_dev= std(time_series_trim(rts_mask))
 results(end).analysis.results = struct( ....
     'rts',  rts); % 
 
