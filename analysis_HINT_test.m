@@ -1,4 +1,4 @@
-function [rts, rts_st_dev] = analysis_HINT_test(results, varargin)
+function [rts, rts_st_dev, time_series] = analysis_HINT_test(results, varargin)
 %% DESCRIPTION:
 %
 %   Analysis script for HINT administered under various circumstances
