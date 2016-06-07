@@ -521,6 +521,8 @@ for i=1:numel(group_numbers)
 
         % HASPI reference track
         %   Mix the sound and collapse into a single reference track. 
+        d.haspi_reference_mixer=[1; 0; 0; 0; 0; 0; 0]
+        d.HL=[0 0 0 0 0 0; 0 0 0 0 0 0]
         haspi_reference = sum(oo_original * d.haspi_reference_mixer, 2);
 
         % Calculate scaling factor for haspi_reference. This will force the RMS 

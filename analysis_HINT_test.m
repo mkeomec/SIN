@@ -191,10 +191,11 @@ time_series = db(modmix(channel_mask), 'voltage');
 %   Remove the trials we don't want to use in scoring.
 
 % Need to handle the "Inf" case here if users want to include all trials.
-if d.trials_to_score == Inf
+exist('d.trials_to_score')
+if exist('d.trials_to_score') == 0
     
     % Need to add the 1 because we subtract 1 below. 
-    d.trials_to_score = length(time_series) - d.start_at_trial + 1;
+    d.trials_to_score = 17;
 end % 
 time_series_trim = time_series(d.start_at_trial:d.start_at_trial + d.trials_to_score - 1); 
 
